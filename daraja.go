@@ -14,6 +14,15 @@ type Client interface {
 	Token(ctx context.Context) (string, error)
 
 	STKPush(ctx context.Context, req STKPushRequest) (*STKPushResponse, error)
+	STKPushQuery(ctx context.Context, req STKPushQueryRequest) (*STKPushQueryResponse, error)
+
+	C2BSimulate(ctx context.Context, req C2BSimulationRequest) (*C2BResponse, error)
+	C2BRegisterURL(ctx context.Context, req RegisterURLRequest) (*RegisterURLResponse, error)
+
+	B2CPayment(ctx context.Context, req B2CPaymentRequest) (*B2CPaymentResponse, error)
+
+	TransactionStatus(ctx context.Context, req TransactionStatusRequest) (*TransactionStatusResponse, error)
+	Reversal(ctx context.Context, req ReversalRequest) (*ReversalResponse, error)
 }
 
 type client struct {
