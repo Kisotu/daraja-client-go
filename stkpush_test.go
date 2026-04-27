@@ -64,6 +64,46 @@ func TestValidateSTKPushRequest_MissingFields(t *testing.T) {
 			req:     buildReq(func(r *STKPushRequest) { r.TransactionDesc = "" }),
 			wantErr: true,
 		},
+		{
+			name:    "unsupported phone prefix",
+			req:     buildReq(func(r *STKPushRequest) { r.PhoneNumber = "0712345678" }),
+			wantErr: true,
+		},
+		{
+			name:    "invalid TransactionType",
+			req:     buildReq(func(r *STKPushRequest) { r.TransactionType = "InvalidType" }),
+			wantErr: true,
+		},
+		{
+			name: "valid CustomerPayBillOnline",
+			req: STKPushRequest{
+				BusinessShortCode: "174379",
+				TransactionType:   "CustomerPayBillOnline",
+				Amount:            "1",
+				PartyA:            "254712345678",
+				PartyB:            "174379",
+				PhoneNumber:       "254712345678",
+				CallBackURL:       "https://example.com/callback",
+				AccountReference:  "Test",
+				TransactionDesc:   "Test payment",
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid CustomerBuyGoodsOnline",
+			req: STKPushRequest{
+				BusinessShortCode: "174379",
+				TransactionType:   "CustomerBuyGoodsOnline",
+				Amount:            "1",
+				PartyA:            "254712345678",
+				PartyB:            "174379",
+				PhoneNumber:       "254712345678",
+				CallBackURL:       "https://example.com/callback",
+				AccountReference:  "Test",
+				TransactionDesc:   "Test payment",
+			},
+			wantErr: false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -95,6 +135,25 @@ func TestIsRetryable(t *testing.T) {
 	for _, tt := range tests {
 		if got := isRetryable(tt.code); got != tt.retryable {
 			t.Errorf("isRetryable(%d) = %v, want %v", tt.code, got, tt.retryable)
+		}
+	}
+}
+
+func TestHasSupportedPrefix(t *testing.T) {
+	tests := []struct {
+		phone    string
+		expected bool
+	}{
+		{"254712345678", true},
+		{"254700000000", true},
+		{"0712345678", false},
+		{"+254712345678", false},
+		{"", false},
+		{"123456789", false},
+	}
+	for _, tt := range tests {
+		if got := hasSupportedPrefix(tt.phone); got != tt.expected {
+			t.Errorf("hasSupportedPrefix(%q) = %v, want %v", tt.phone, got, tt.expected)
 		}
 	}
 }
