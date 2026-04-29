@@ -1,0 +1,26 @@
+name: Security Concern
+description: Privately report a security vulnerability
+labels: ["type:security"]
+body:
+  - type: markdown
+    attributes:
+      value: |-
+        **Please do NOT publicly disclose security vulnerabilities here.**
+        Follow the process in [SECURITY.md](/SECURITY.md) for responsible disclosure.
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      options:
+        - Question about security best practices
+        - Dependency vulnerability
+        - Other security concern
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe your concern
+    validations:
+      required: true
