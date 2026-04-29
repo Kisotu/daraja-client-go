@@ -2,9 +2,11 @@
 package transport
 
 import (
+	"crypto/rand"
+	"encoding/binary"
 	"fmt"
 	"io"
-	"math/rand"
+	"math"
 	"net/http"
 	"time"
 )
@@ -87,7 +89,7 @@ func (rt *RetryTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		if err != nil {
 			return nil, fmt.Errorf("transport: failed to read request body: %w", err)
 		}
-		req.Body.Close()
+		_ = req.Body.Close()
 	}
 
 	var lastResp *http.Response
@@ -126,8 +128,8 @@ func (rt *RetryTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 
 		// Close response body if we're going to retry
 		if resp != nil && resp.Body != nil {
-			io.Copy(io.Discard, resp.Body)
-			resp.Body.Close()
+			_, _ = io.Copy(io.Discard, resp.Body)
+			_ = resp.Body.Close()
 		}
 
 		// Calculate backoff with jitter
@@ -182,9 +184,12 @@ func calculateBackoff(attempt int, baseDelay, maxDelay time.Duration) time.Durat
 	// Exponential backoff: baseDelay * 2^attempt
 	delay := baseDelay * (1 << attempt)
 
-	// Add jitter: +/-25% randomization
+	// Add jitter: +/-25% randomization using crypto/rand
 	jitter := float64(delay) * 0.25
-	offset := (rand.Float64() * 2 * jitter) - jitter
+	var buf [8]byte
+	_, _ = rand.Read(buf[:])
+	randomFloat := float64(binary.LittleEndian.Uint64(buf[:])) / float64(math.MaxUint64)
+	offset := (randomFloat * 2 * jitter) - jitter
 	delay = time.Duration(float64(delay) + offset)
 
 	// Cap at maxDelay

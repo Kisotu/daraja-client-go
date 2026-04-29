@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	c2bSimulatePath   = "/mpesa/c2b/v1/simulate"
-	c2bRegURLPath     = "/mpesa/c2b/v1/registerurl"
+	c2bSimulatePath = "/mpesa/c2b/v1/simulate"
+	c2bRegURLPath   = "/mpesa/c2b/v1/registerurl"
 )
 
 // C2BSimulationRequest represents a C2B simulation request.
@@ -76,7 +76,7 @@ func (c *client) C2BSimulate(ctx context.Context, req C2BSimulationRequest) (*C2
 	if err != nil {
 		return nil, fmt.Errorf("daraja: C2B simulation request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -90,11 +90,11 @@ func (c *client) C2BSimulate(ctx context.Context, req C2BSimulationRequest) (*C2
 
 	if c2bResp.ResponseCode != "0" {
 		return &c2bResp, &DarajaError{
-			HTTPStatus:    resp.StatusCode,
-			ResponseCode:  c2bResp.ResponseCode,
-			ResponseDesc:  c2bResp.ResponseDescription,
-			Endpoint:      c2bSimulatePath,
-			Retryable:     isRetryable(resp.StatusCode),
+			HTTPStatus:   resp.StatusCode,
+			ResponseCode: c2bResp.ResponseCode,
+			ResponseDesc: c2bResp.ResponseDescription,
+			Endpoint:     c2bSimulatePath,
+			Retryable:    isRetryable(resp.StatusCode),
 		}
 	}
 
@@ -129,7 +129,7 @@ func (c *client) C2BRegisterURL(ctx context.Context, req RegisterURLRequest) (*R
 	if err != nil {
 		return nil, fmt.Errorf("daraja: register URL request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -143,11 +143,11 @@ func (c *client) C2BRegisterURL(ctx context.Context, req RegisterURLRequest) (*R
 
 	if regResp.ResponseCode != "0" {
 		return &regResp, &DarajaError{
-			HTTPStatus:    resp.StatusCode,
-			ResponseCode:  regResp.ResponseCode,
-			ResponseDesc:  regResp.ResponseDescription,
-			Endpoint:      c2bRegURLPath,
-			Retryable:     isRetryable(resp.StatusCode),
+			HTTPStatus:   resp.StatusCode,
+			ResponseCode: regResp.ResponseCode,
+			ResponseDesc: regResp.ResponseDescription,
+			Endpoint:     c2bRegURLPath,
+			Retryable:    isRetryable(resp.StatusCode),
 		}
 	}
 

@@ -38,11 +38,11 @@ type AuthManager struct {
 	authURL        string
 	httpClient     *http.Client
 
-	mu           sync.RWMutex
-	token        string
-	expiresAt    time.Time
-	refreshing   chan struct{}
-	tokenBuffer  time.Duration
+	mu          sync.RWMutex
+	token       string
+	expiresAt   time.Time
+	refreshing  chan struct{}
+	tokenBuffer time.Duration
 }
 
 // NewAuthManager creates a new AuthManager.
@@ -110,7 +110,7 @@ func (a *AuthManager) refreshToken(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("auth: token request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

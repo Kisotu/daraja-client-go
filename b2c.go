@@ -70,7 +70,7 @@ func (c *client) B2CPayment(ctx context.Context, req B2CPaymentRequest) (*B2CPay
 	if err != nil {
 		return nil, fmt.Errorf("daraja: B2C payment request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -84,11 +84,11 @@ func (c *client) B2CPayment(ctx context.Context, req B2CPaymentRequest) (*B2CPay
 
 	if b2cResp.ResponseCode != "0" {
 		return &b2cResp, &DarajaError{
-			HTTPStatus:    resp.StatusCode,
-			ResponseCode:  b2cResp.ResponseCode,
-			ResponseDesc:  b2cResp.ResponseDescription,
-			Endpoint:      b2cPaymentPath,
-			Retryable:     isRetryable(resp.StatusCode),
+			HTTPStatus:   resp.StatusCode,
+			ResponseCode: b2cResp.ResponseCode,
+			ResponseDesc: b2cResp.ResponseDescription,
+			Endpoint:     b2cPaymentPath,
+			Retryable:    isRetryable(resp.StatusCode),
 		}
 	}
 

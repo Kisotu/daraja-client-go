@@ -70,7 +70,7 @@ func (c *client) Reversal(ctx context.Context, req ReversalRequest) (*ReversalRe
 	if err != nil {
 		return nil, fmt.Errorf("daraja: reversal request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -84,11 +84,11 @@ func (c *client) Reversal(ctx context.Context, req ReversalRequest) (*ReversalRe
 
 	if revResp.ResponseCode != "0" {
 		return &revResp, &DarajaError{
-			HTTPStatus:    resp.StatusCode,
-			ResponseCode:  revResp.ResponseCode,
-			ResponseDesc:  revResp.ResponseDescription,
-			Endpoint:      reversalPath,
-			Retryable:     isRetryable(resp.StatusCode),
+			HTTPStatus:   resp.StatusCode,
+			ResponseCode: revResp.ResponseCode,
+			ResponseDesc: revResp.ResponseDescription,
+			Endpoint:     reversalPath,
+			Retryable:    isRetryable(resp.StatusCode),
 		}
 	}
 

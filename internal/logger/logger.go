@@ -89,25 +89,25 @@ func NewDefaultLogger(level slog.Level) Logger {
 func (s *slogLogger) Debug(msg string, attrs ...slog.Attr) {
 	attrs = s.withAttrs(attrs)
 	attrs = RedactAttrs(attrs)
-	s.logger.LogAttrs(nil, slog.LevelDebug, msg, attrs...)
+	s.logger.LogAttrs(context.TODO(), slog.LevelDebug, msg, attrs...)
 }
 
 func (s *slogLogger) Info(msg string, attrs ...slog.Attr) {
 	attrs = s.withAttrs(attrs)
 	attrs = RedactAttrs(attrs)
-	s.logger.LogAttrs(nil, slog.LevelInfo, msg, attrs...)
+	s.logger.LogAttrs(context.TODO(), slog.LevelInfo, msg, attrs...)
 }
 
 func (s *slogLogger) Warn(msg string, attrs ...slog.Attr) {
 	attrs = s.withAttrs(attrs)
 	attrs = RedactAttrs(attrs)
-	s.logger.LogAttrs(nil, slog.LevelWarn, msg, attrs...)
+	s.logger.LogAttrs(context.TODO(), slog.LevelWarn, msg, attrs...)
 }
 
 func (s *slogLogger) Error(msg string, attrs ...slog.Attr) {
 	attrs = s.withAttrs(attrs)
 	attrs = RedactAttrs(attrs)
-	s.logger.LogAttrs(nil, slog.LevelError, msg, attrs...)
+	s.logger.LogAttrs(context.TODO(), slog.LevelError, msg, attrs...)
 }
 
 func (s *slogLogger) With(attrs ...slog.Attr) Logger {

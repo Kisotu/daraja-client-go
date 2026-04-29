@@ -155,5 +155,5 @@ func ValidateCallbackPayload(result *STKPushResult, expectedCheckoutID, expected
 func WriteOK(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	io.Copy(w, bytes.NewReader([]byte(`{"ResultCode":0,"ResultDesc":"Success"}`)))
+	_, _ = io.Copy(w, bytes.NewReader([]byte(`{"ResultCode":0,"ResultDesc":"Success"}`)))
 }

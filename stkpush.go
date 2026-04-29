@@ -28,7 +28,7 @@ type STKPushRequest struct {
 
 // validTransactionTypes is the set of allowed TransactionType values.
 var validTransactionTypes = map[string]bool{
-	"CustomerPayBillOnline": true,
+	"CustomerPayBillOnline":  true,
 	"CustomerBuyGoodsOnline": true,
 }
 
@@ -60,7 +60,7 @@ func (c *client) STKPush(ctx context.Context, req STKPushRequest) (*STKPushRespo
 		[]byte(fmt.Sprintf("%s%s%s", req.BusinessShortCode, c.config.Passkey, req.Timestamp)),
 	)
 
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req) // #nosec G117 - Password must be sent to the API
 	if err != nil {
 		return nil, fmt.Errorf("daraja: failed to marshal STK push request: %w", err)
 	}
@@ -78,7 +78,7 @@ func (c *client) STKPush(ctx context.Context, req STKPushRequest) (*STKPushRespo
 	if err != nil {
 		return nil, fmt.Errorf("daraja: STK push request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -92,11 +92,11 @@ func (c *client) STKPush(ctx context.Context, req STKPushRequest) (*STKPushRespo
 
 	if stkResp.ResponseCode != "0" {
 		return &stkResp, &DarajaError{
-			HTTPStatus:    resp.StatusCode,
-			ResponseCode:  stkResp.ResponseCode,
-			ResponseDesc:  stkResp.ResponseDescription,
-			Endpoint:      "/mpesa/stkpush/v1/processrequest",
-			Retryable:     isRetryable(resp.StatusCode),
+			HTTPStatus:   resp.StatusCode,
+			ResponseCode: stkResp.ResponseCode,
+			ResponseDesc: stkResp.ResponseDescription,
+			Endpoint:     "/mpesa/stkpush/v1/processrequest",
+			Retryable:    isRetryable(resp.StatusCode),
 		}
 	}
 
@@ -183,7 +183,7 @@ func (c *client) STKPushQuery(ctx context.Context, req STKPushQueryRequest) (*ST
 		[]byte(fmt.Sprintf("%s%s%s", req.BusinessShortCode, c.config.Passkey, req.Timestamp)),
 	)
 
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req) // #nosec G117 - Password must be sent to the API
 	if err != nil {
 		return nil, fmt.Errorf("daraja: failed to marshal STK push query request: %w", err)
 	}
@@ -201,7 +201,7 @@ func (c *client) STKPushQuery(ctx context.Context, req STKPushQueryRequest) (*ST
 	if err != nil {
 		return nil, fmt.Errorf("daraja: STK push query request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -215,11 +215,11 @@ func (c *client) STKPushQuery(ctx context.Context, req STKPushQueryRequest) (*ST
 
 	if queryResp.ResponseCode != "0" {
 		return &queryResp, &DarajaError{
-			HTTPStatus:    resp.StatusCode,
-			ResponseCode:  queryResp.ResponseCode,
-			ResponseDesc:  queryResp.ResponseDescription,
-			Endpoint:      "/mpesa/stkpushquery/v1/query",
-			Retryable:     isRetryable(resp.StatusCode),
+			HTTPStatus:   resp.StatusCode,
+			ResponseCode: queryResp.ResponseCode,
+			ResponseDesc: queryResp.ResponseDescription,
+			Endpoint:     "/mpesa/stkpushquery/v1/query",
+			Retryable:    isRetryable(resp.StatusCode),
 		}
 	}
 

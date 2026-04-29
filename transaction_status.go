@@ -15,17 +15,17 @@ const (
 
 // TransactionStatusRequest represents a transaction status query request.
 type TransactionStatusRequest struct {
-	Initiator          string `json:"Initiator"`
-	SecurityCredential string `json:"SecurityCredential"`
-	CommandID          string `json:"CommandID"`
-	TransactionID      string `json:"TransactionID"`
+	Initiator              string `json:"Initiator"`
+	SecurityCredential     string `json:"SecurityCredential"`
+	CommandID              string `json:"CommandID"`
+	TransactionID          string `json:"TransactionID"`
 	OriginalConversationID string `json:"OriginalConversationID,omitempty"`
-	PartyA             string `json:"PartyA"`
-	IdentifierType     string `json:"IdentifierType"`
-	ResultURL          string `json:"ResultURL"`
-	QueueTimeOutURL    string `json:"QueueTimeOutURL"`
-	Remarks            string `json:"Remarks"`
-	Occasion           string `json:"Occasion"`
+	PartyA                 string `json:"PartyA"`
+	IdentifierType         string `json:"IdentifierType"`
+	ResultURL              string `json:"ResultURL"`
+	QueueTimeOutURL        string `json:"QueueTimeOutURL"`
+	Remarks                string `json:"Remarks"`
+	Occasion               string `json:"Occasion"`
 }
 
 // TransactionStatusResponse represents the response from a transaction status
@@ -65,7 +65,7 @@ func (c *client) TransactionStatus(ctx context.Context, req TransactionStatusReq
 	if err != nil {
 		return nil, fmt.Errorf("daraja: transaction status request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -79,11 +79,11 @@ func (c *client) TransactionStatus(ctx context.Context, req TransactionStatusReq
 
 	if tsResp.ResponseCode != "0" {
 		return &tsResp, &DarajaError{
-			HTTPStatus:    resp.StatusCode,
-			ResponseCode:  tsResp.ResponseCode,
-			ResponseDesc:  tsResp.ResponseDescription,
-			Endpoint:      transactionStatusPath,
-			Retryable:     isRetryable(resp.StatusCode),
+			HTTPStatus:   resp.StatusCode,
+			ResponseCode: tsResp.ResponseCode,
+			ResponseDesc: tsResp.ResponseDescription,
+			Endpoint:     transactionStatusPath,
+			Retryable:    isRetryable(resp.StatusCode),
 		}
 	}
 
