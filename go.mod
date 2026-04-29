@@ -1,5 +1,11 @@
-module github.com/anomalyco/daraja-client-go
+module github.com/Kisotu/daraja-client-go
 
-go 1.26.2
+go 1.23.0
 
-require github.com/google/uuid v1.6.0 // indirect
+require (
+	github.com/google/uuid v1.6.0
+	go.opentelemetry.io/otel v1.24.0
+	go.opentelemetry.io/otel/trace v1.24.0
+)
+
+require github.com/google/go-cmp v0.7.0 // indirect
