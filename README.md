@@ -22,7 +22,7 @@ import (
     "log"
     "os"
 
-    "github.com/anomalyco/daraja-client-go"
+    "github.com/Kisotu/daraja-client-go"
 )
 
 func main() {
@@ -61,7 +61,7 @@ func main() {
 ## Installation
 
 ```bash
-go get github.com/anomalyco/daraja-client-go
+go get github.com/Kisotu/daraja-client-go
 ```
 
 ## Requirements
