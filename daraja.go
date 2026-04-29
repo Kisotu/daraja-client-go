@@ -5,8 +5,9 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/anomalyco/daraja-client-go/auth"
-	"github.com/anomalyco/daraja-client-go/transport"
+	"github.com/Kisotu/daraja-client-go/auth"
+	"github.com/Kisotu/daraja-client-go/internal/trace"
+	"github.com/Kisotu/daraja-client-go/transport"
 )
 
 // Client is the public interface for Daraja operations.
@@ -29,35 +30,39 @@ type client struct {
 	config  *Config
 	authMgr *auth.AuthManager
 	http    *http.Client
+	tracer  trace.Tracer
 }
 
 // NewClient creates a new Daraja client with the given options.
 func NewClient(opts ...Option) (Client, error) {
 	cfg := &Config{
 		HTTPClient: transport.NewSecureClient(),
+		Tracer:     trace.NewNoopTracer(),
 	}
-
 	for _, opt := range opts {
 		if err := opt(cfg); err != nil {
 			return nil, err
 		}
 	}
-
 	if err := cfg.validate(); err != nil {
 		return nil, err
 	}
-
+	// Initialize tracer if not set (should be set in config already, but safety check)
+	tracer := cfg.Tracer
+	if tracer == nil {
+		tracer = trace.NewNoopTracer()
+	}
 	authMgr := auth.NewAuthManager(auth.AuthConfig{
 		ConsumerKey:    cfg.ConsumerKey,
 		ConsumerSecret: cfg.ConsumerSecret,
 		BaseURL:        cfg.Environment.authURL(),
 		HTTPClient:     cfg.HTTPClient,
 	})
-
 	return &client{
 		config:  cfg,
 		authMgr: authMgr,
 		http:    cfg.HTTPClient,
+		tracer:  tracer,
 	}, nil
 }
 

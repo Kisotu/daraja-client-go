@@ -3,6 +3,8 @@ package daraja
 import (
 	"errors"
 	"net/http"
+
+	"github.com/Kisotu/daraja-client-go/internal/trace"
 )
 
 // Environment represents the Daraja API environment.
@@ -35,6 +37,7 @@ type Config struct {
 	ShortCode      string
 	Passkey        string
 	HTTPClient     *http.Client
+	Tracer         trace.Tracer
 }
 
 // Option is a functional option for configuring the client.
@@ -73,6 +76,19 @@ func WithHTTPClient(httpClient *http.Client) Option {
 			return errors.New("daraja: HTTP client must not be nil")
 		}
 		c.HTTPClient = httpClient
+		return nil
+	}
+}
+
+// WithTracer sets a custom tracer for distributed tracing.
+// If nil is passed, a no-op tracer will be used by default.
+func WithTracer(tracer trace.Tracer) Option {
+	return func(c *Config) error {
+		if tracer == nil {
+			c.Tracer = trace.NewNoopTracer()
+		} else {
+			c.Tracer = tracer
+		}
 		return nil
 	}
 }
