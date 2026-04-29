@@ -7,14 +7,19 @@ linters:
     - misspell
     - unconvert
     - unparam
-issues:
-  exclude-rules:
-    - path: _test\.go$
-      linters:
-        - errcheck
-  exclude:
-    - "exported:"
-    - "should have comment"
-    - "ST1000"
+  exclusions:
+    rules:
+      - path: _test\.go$
+        linters:
+          - errcheck
+      - text: "exported:"
+        linters:
+          - revive
+      - text: "should have comment"
+        linters:
+          - revive
+      - linters:
+          - staticcheck
+        text: "ST1000"
 run:
   timeout: 5m
