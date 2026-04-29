@@ -61,9 +61,11 @@ func TestBreaker_OpensAfterThreshold(t *testing.T) {
 
 	// Trigger 3 failures
 	for i := 0; i < 3; i++ {
-		b.Execute(func() error {
+		if err := b.Execute(func() error {
 			return errors.New("failure")
-		})
+		}); err == nil {
+			t.Errorf("expected failure while opening circuit")
+		}
 	}
 
 	if b.State() != StateOpen {
@@ -80,9 +82,11 @@ func TestBreaker_ReturnsCircuitOpenError(t *testing.T) {
 	b := New(cfg)
 
 	// Trigger failure to open circuit
-	b.Execute(func() error {
+	if err := b.Execute(func() error {
 		return errors.New("failure")
-	})
+	}); err == nil {
+		t.Fatalf("expected failure while opening circuit")
+	}
 
 	if b.State() != StateOpen {
 		t.Fatalf("Expected open state")
@@ -107,9 +111,11 @@ func TestBreaker_TransitionsToHalfOpen(t *testing.T) {
 	b := New(cfg)
 
 	// Open the circuit
-	b.Execute(func() error {
+	if err := b.Execute(func() error {
 		return errors.New("failure")
-	})
+	}); err == nil {
+		t.Fatalf("expected failure while opening circuit")
+	}
 
 	if b.State() != StateOpen {
 		t.Fatalf("Expected open state")
@@ -133,9 +139,11 @@ func TestBreaker_ClosesAfterSuccessThreshold(t *testing.T) {
 	b := New(cfg)
 
 	// Open the circuit
-	b.Execute(func() error {
+	if err := b.Execute(func() error {
 		return errors.New("failure")
-	})
+	}); err == nil {
+		t.Fatalf("expected failure while opening circuit")
+	}
 
 	// Wait for timeout
 	time.Sleep(100 * time.Millisecond)
@@ -146,18 +154,22 @@ func TestBreaker_ClosesAfterSuccessThreshold(t *testing.T) {
 	}
 
 	// Success 1
-	b.Execute(func() error {
+	if err := b.Execute(func() error {
 		return nil
-	})
+	}); err != nil {
+		t.Fatalf("expected success in half-open state: %v", err)
+	}
 
 	if b.State() != StateHalfOpen {
 		t.Errorf("State = %v, want %v after first success", b.State(), StateHalfOpen)
 	}
 
 	// Success 2 - should close
-	b.Execute(func() error {
+	if err := b.Execute(func() error {
 		return nil
-	})
+	}); err != nil {
+		t.Fatalf("expected success closing circuit: %v", err)
+	}
 
 	if b.State() != StateClosed {
 		t.Errorf("State = %v, want %v after second success", b.State(), StateClosed)
@@ -173,9 +185,11 @@ func TestBreaker_ReturnsToOpenOnHalfOpenFailure(t *testing.T) {
 	b := New(cfg)
 
 	// Open the circuit
-	b.Execute(func() error {
+	if err := b.Execute(func() error {
 		return errors.New("failure")
-	})
+	}); err == nil {
+		t.Fatalf("expected failure while opening circuit")
+	}
 
 	// Wait for timeout
 	time.Sleep(100 * time.Millisecond)
@@ -186,9 +200,11 @@ func TestBreaker_ReturnsToOpenOnHalfOpenFailure(t *testing.T) {
 	}
 
 	// Failure in half-open returns to open
-	b.Execute(func() error {
+	if err := b.Execute(func() error {
 		return errors.New("failure")
-	})
+	}); err == nil {
+		t.Fatalf("expected failure in half-open state")
+	}
 
 	if b.State() != StateOpen {
 		t.Errorf("State = %v, want %v", b.State(), StateOpen)
@@ -204,9 +220,11 @@ func TestBreaker_Reset(t *testing.T) {
 	b := New(cfg)
 
 	// Open the circuit
-	b.Execute(func() error {
+	if err := b.Execute(func() error {
 		return errors.New("failure")
-	})
+	}); err == nil {
+		t.Fatalf("expected failure while opening circuit")
+	}
 
 	if b.State() != StateOpen {
 		t.Fatalf("Expected open state")
@@ -254,9 +272,15 @@ func TestBreaker_Metrics(t *testing.T) {
 	b := New(cfg)
 
 	// Execute some requests
-	b.Execute(func() error { return nil })
-	b.Execute(func() error { return errors.New("fail") })
-	b.Execute(func() error { return nil })
+	if err := b.Execute(func() error { return nil }); err != nil {
+		t.Fatalf("expected success: %v", err)
+	}
+	if err := b.Execute(func() error { return errors.New("fail") }); err == nil {
+		t.Fatalf("expected failure")
+	}
+	if err := b.Execute(func() error { return nil }); err != nil {
+		t.Fatalf("expected success: %v", err)
+	}
 
 	metrics := b.Metrics()
 
@@ -288,9 +312,13 @@ func TestBreaker_ConcurrentAccess(t *testing.T) {
 	for i := 0; i < 100; i++ {
 		go func(fail bool) {
 			if fail {
-				b.Execute(func() error { return errors.New("fail") })
+				if err := b.Execute(func() error { return errors.New("fail") }); err == nil {
+					t.Errorf("expected failure")
+				}
 			} else {
-				b.Execute(func() error { return nil })
+				if err := b.Execute(func() error { return nil }); err != nil {
+					t.Errorf("expected success: %v", err)
+				}
 			}
 			done <- true
 		}(i%2 == 0)

@@ -25,7 +25,9 @@ func TestAuthManager_Token_Fetch(t *testing.T) {
 			AccessToken: "test-token",
 			ExpiresIn:   "3599",
 		}
-		json.NewEncoder(w).Encode(resp)
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			t.Errorf("encode response: %v", err)
+		}
 	}))
 	defer srv.Close()
 
@@ -53,7 +55,9 @@ func TestAuthManager_Token_Cache(t *testing.T) {
 			AccessToken: "test-token",
 			ExpiresIn:   "3599",
 		}
-		json.NewEncoder(w).Encode(resp)
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			t.Errorf("encode response: %v", err)
+		}
 	}))
 	defer srv.Close()
 
@@ -90,7 +94,9 @@ func TestAuthManager_Token_ExpiredCache(t *testing.T) {
 			AccessToken: "token-" + string(rune('A'+callCount-1)),
 			ExpiresIn:   "1",
 		}
-		json.NewEncoder(w).Encode(resp)
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			t.Errorf("encode response: %v", err)
+		}
 	}))
 	defer srv.Close()
 
@@ -130,7 +136,9 @@ func TestAuthManager_Token_SingleFlight(t *testing.T) {
 			AccessToken: "test-token",
 			ExpiresIn:   "1",
 		}
-		json.NewEncoder(w).Encode(resp)
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			t.Errorf("encode response: %v", err)
+		}
 	}))
 	defer srv.Close()
 
@@ -193,7 +201,9 @@ func TestAuthManager_Token_EmptyToken(t *testing.T) {
 			AccessToken: "",
 			ExpiresIn:   "3599",
 		}
-		json.NewEncoder(w).Encode(resp)
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			t.Errorf("encode response: %v", err)
+		}
 	}))
 	defer srv.Close()
 
@@ -245,7 +255,9 @@ func TestAuthorizationHeader(t *testing.T) {
 			AccessToken: "test-token",
 			ExpiresIn:   "3599",
 		}
-		json.NewEncoder(w).Encode(resp)
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			t.Errorf("encode response: %v", err)
+		}
 	}))
 	defer srv.Close()
 
